@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>hello phaser!</title>
+        <script src="phaser.js"></script>
+        <script src="npc_avoidance.js"></script>
+        
+    </head>
+    <body>
+
+    <script type="text/javascript">
+
+    window.onload = function() {
+        var width = 100;
+        var height = 100;
+        var counter = 0;
+        game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
+
+        function preload() {
+            
+            game.load.image('goodGuy', 'images/goodGuy.png');
+            game.load.image('badGuy', 'images/badGuy.png');
+
+        }
+
+
+        
+        var map;
+        var layer;
+
+        var cursors;
+        var sprite;
+
+        function create() {
+
+            game.physics.startSystem(Phaser.Physics.ARCADE);
+            var group = game.add.group();
+
+            for (var i = 0; i < 2; i++){
+                sprite = new NPC(game, 'badGuy');
+                sprite = group.add(sprite);
+            }
+    
+
+
+
+        }
+
+        function update() {
+
+            
+
+        }
+
+        function render() {
+
+            // game.debug.text('Click to randomise tiles', 32, 32, 'rgb(0,0,0)');
+            // game.debug.text('Tile X: ' + layer.getTileX(sprite.x), 32, 48, 'rgb(0,0,0)');
+            // game.debug.text('Tile Y: ' + layer.getTileY(sprite.y), 32, 64, 'rgb(0,0,0)');
+
+        }
+
+    };
+
+    </script>
+        <div id="game"></div>
+    </body>
+</html>
