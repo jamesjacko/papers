@@ -12,6 +12,11 @@ var Hero = function(game, texture, god){
 
   Phaser.Sprite.call(this, game, 400, 400, texture);
 
+  this.followermarker = new Phaser.Sprite(game, 400, 400, 'arrow');
+  this.followermarker = game.add.existing(this.followermarker);
+  this.followermarker.anchor.setTo(0.5, 0.5);
+  this.followermarker.kill();
+
   this.anchor.setTo(0.5, 0.5);
   this.health = 20;
   // health bar shown above user
@@ -23,7 +28,7 @@ var Hero = function(game, texture, god){
   
 
   game.physics.enable(this);
-  // game.camera.follow(this);
+  game.camera.follow(this);
 
   this.fire = function(){
     bullet = new Round(game, 'round', this, game.badGuyGroup);
@@ -79,4 +84,19 @@ Hero.prototype.update = function(){
       if(this.cursors.up.isDown){
         this.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(this.angle, inc));
       }
+      if( !game.follower.inCamera ){
+            this.followermarker.revive(0);
+            var dx = game.follower.position.x - this.position.x;
+            var dy = game.follower.position.y - this.position.y;
+            var angle = Math.atan2(dy, dx);
+            var pointer_x = this.position.x + Math.cos(angle) * 60;
+            var pointer_y = this.position.y + Math.sin(angle) * 60;
+            this.followermarker.rotation = angle;
+            this.followermarker.position.x = pointer_x;
+            this.followermarker.position.y = pointer_y;
+
+          }else if (game.follower.alive) {
+
+            this.followermarker.kill();
+          }
 };

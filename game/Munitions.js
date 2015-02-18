@@ -18,7 +18,6 @@ var Round = function(game, texture, shooter, victim){
 		}
 		round.destroy();
 		victim.health--;
-		console.log(victim.health);
 	}
 	this.anchor = {
 	    x: 0,
@@ -51,7 +50,6 @@ var Mine = function(game, texture, shooter, victim){
 		}
 		mine.destroy();
 		victim.health -= 10;
-		console.log(victom.health)
 	}
 	this.anchor = {
 		x: 0.5,

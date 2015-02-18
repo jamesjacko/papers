@@ -18,6 +18,7 @@ window.onload = function() {
     game.load.image('mine', 'images/mine.png');
     game.load.image('healthbar', 'images/healthbar.png');
     game.load.image('follower', 'images/follower.png');
+    game.load.image('arrow', 'images/arrow.png');
     game.time.advancedTiming = true;
 
   }

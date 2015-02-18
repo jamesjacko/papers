@@ -41,7 +41,7 @@ var Follower = function(game, texture ,position){
   updateHeading(this);
 
 
-  game.camera.follow(this);
+  //game.camera.follow(this);
   
 }
 
