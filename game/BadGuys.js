@@ -82,6 +82,7 @@ var BadGuy = function(game, texture, index){
     if(Math.abs(toDegrees(angle)) < this.VISION_ANGLE && 
       this.game.physics.arcade.distanceBetween(this, obj) < this.VISION_LENGTH * this.visionMagnifier){
       this.state = "alert";
+      this.currentTarget = obj;
       this.seekTimer = this.game.time.now + this.SEEK_TIME;
       this.heading.x = obj.position.x;
       this.heading.y = obj.position.y;
@@ -152,7 +153,7 @@ var BadGuy = function(game, texture, index){
       this.seek(50);
 
     if(this.game.time.now > this.nextRound){
-      var bullet = new Round(this.game, 'round', this, this.player);
+      var bullet = new Round(this.game, 'round', this, this.currentTarget);
       game.add.existing(bullet);
       bullet.fire();
       this.nextRound = this.game.time.now + this.FIRE_RATE;

@@ -46,7 +46,8 @@ window.onload = function() {
     game.player = new Hero(game, 'goodGuy', true);
     game.player = game.add.existing(game.player);
     
-    game.follower = new Follower(game, texture, i);
+    game.follower = new Follower(game, 'follower', i);
+    game.follower = game.add.existing(game.follower);
     game.badGuyGroup = new BadGuys(game, BAD_GUY_AMNT, 'badGuy');
 
     // water and land collision detections
@@ -70,7 +71,7 @@ window.onload = function() {
       window.open("https://www.surveymonkey.com/s/MYSC88K");
     } else {
     
-    game.physics.arcade.collide(game.followerGroup, game.followerGroup);
+    game.physics.arcade.collide(game.follower, game.follower);
     game.physics.arcade.collide(game.badGuyGroup, game.badGuyGroup);
     // enable tilemap collision
     this.game.physics.arcade.collide(game.player, layer, collide);
