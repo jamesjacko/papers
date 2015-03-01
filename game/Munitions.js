@@ -18,6 +18,9 @@ var Round = function(game, texture, shooter, victim){
 		}
 		round.destroy();
 		victim.health--;
+		if(typeof victim.underAttack != "undefined"){
+			victim.underAttack = true;
+		}
 	}
 	this.anchor = {
 	    x: 0,
@@ -50,6 +53,7 @@ var Mine = function(game, texture, shooter, victim){
 		}
 		mine.destroy();
 		victim.health -= 10;
+
 	}
 	this.anchor = {
 		x: 0.5,

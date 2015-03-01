@@ -47,8 +47,8 @@ var updateHeading = function(_this){
 var wander = function(_this, game){
     var coord;
 
-    // speed of bad guys increases as killCount goes higher
-    var speed = 60 * (1 + (game.killCount / 15));
+    
+    var speed = (typeof _this.speed != "undefined")? _this.speed: 60;
     if(coord = _this.movementStack.pop()){
       game.physics.arcade.moveToXY(_this, coord.x, coord.y, speed);
       var dx = coord.x - _this.position.x;

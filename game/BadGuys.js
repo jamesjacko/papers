@@ -109,7 +109,7 @@ var BadGuy = function(game, texture, index){
     } else {
       this.state = "seek";
     }
-    //this.targetOther(this.game.player);
+    this.targetOther(this.game.player);
     this.targetOther(this.game.follower);
   }
   // draws the vision cone.

@@ -1,0 +1,15 @@
+#padd{
+	width: 780px;
+	height: 80px;
+	background: #272822;
+	padding:10px;
+}
+#game-messages{
+	color: #A4E402;
+	font: normal 11px/1.5 "Courier New";
+	overflow: scroll;
+	height: 80px;
+}
+#game-messages p{
+	margin:0;
+}

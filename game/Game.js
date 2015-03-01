@@ -2,7 +2,7 @@ window.onload = function() {
   var width = 100;
   var height = 100;
   var counter = 0;
-  game = new Phaser.Game(800, 600, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
+  game = new Phaser.Game(800, 500, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
 
   /**
     preload the game, mainly for preloading images and the tilemap
@@ -21,6 +21,12 @@ window.onload = function() {
     game.load.image('arrow', 'images/arrow.png');
     game.time.advancedTiming = true;
 
+  }
+
+  game.broadcast = function(message){
+    objDiv = document.getElementById('game-messages');
+    objDiv.getElementsByTagName('p')[0].innerHTML += message + "<br />";
+    objDiv.scrollTop = objDiv.scrollHeight;
   }
 
 
@@ -66,8 +72,11 @@ window.onload = function() {
 
   function update() {
     // send user to survey on death
-    if(game.player.health < 1 && !game.player.god){
-      alert("You died");
+    if((game.player.health < 1 && !game.player.god) || game.follower.health < 1){
+      if(game.follower.health < 1)
+        alert("You failed to save " + game.follower.moniker);
+      else 
+        alert("You died");
       game.destroy();
       window.open("https://www.surveymonkey.com/s/MYSC88K");
     } else {
@@ -81,8 +90,8 @@ window.onload = function() {
   }
 
   function render() {
-
     // screen text
+    game.debug.text(game.follower.moniker + ' Lives: ' + game.follower.health, 32, 96, 'rgb(0,255,0)');
     game.debug.text('Lives: ' + game.player.health, 32, 64, 'rgb(0,255,0)');
     game.debug.text('Kill Count: ' + game.killCount, 32, 32, 'rgb(0,255,0)');
 

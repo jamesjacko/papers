@@ -5,14 +5,35 @@
  * @param player the player sprite to be used for game logic
 */
 var Follower = function(game, texture ,position){
+  var rand = new RandPoint();
+
+  rand.x += 100;
+  rand.y += 100;
+
+  Phaser.Sprite.call(this, game, rand.x, rand.y, texture);
   this.player = game.player;
+  this.moniker = "Timmy"
   this.index = position;
   this.game = game;
+  this.underAttack = false;
   this.movementStack = new Array();
+  this.health = 20;
+  this.helpmecounter = 0;
+  this.helpwait = 60;
+  this.speed = 80;
+  this.alertcounter = 0;
   this.heading = {
     x: 0,
     y: 0
   };
+
+  this.helpalerts = {
+    0: "Help I'm under attack!!",
+    1: "Please help i'm taking heavy fire",
+    2: "I'm not sure I'm going to survive this on my own",
+    3: "They've spotted me and have me in their sights, help qucik!!",
+    4: "Oh no, I've been spotted, quick, help!!"
+  }
 
   this.currentHeading = {
     x: 0,
@@ -23,12 +44,9 @@ var Follower = function(game, texture ,position){
   var _this = this;
 
   
-  var rand = new RandPoint();
-
-  rand.x += 100;
-  rand.y += 100;
+  
   // Call the Sprite constructor using the JS.prototype call function
-  Phaser.Sprite.call(this, game, rand.x, rand.y, texture);
+  
 
   //set central anchor point.
 
@@ -37,6 +55,12 @@ var Follower = function(game, texture ,position){
     y: 0.5
   }
   game.physics.enable(this);
+
+  this.helpme = function(_this){
+    game.broadcast(_this.helpalerts[Math.floor(Math.random() * 5)]);
+    _this.underAttack = false;
+    _this.helpmecounter = _this.helpwait;
+  }
 
   updateHeading(this);
 
@@ -60,7 +84,18 @@ Follower.prototype.constructor = Follower;
  */
 Follower.prototype.update = function(){
   ask({prob: 20, func: updateHeading, params: this});
-    wander(this, game);
+  wander(this, game);
+  if(this.underAttack){
+    this.alertcounter = 120
+
+    if(this.underAttack && this.helpmecounter < 1){
+      ask({prob: 20, func: this.helpme, params: this});
+    } else if(this.helpmecounter > 0){
+      this.helpmecounter--;
+    }
+  } else {
+    this.alertcounter--;
+  }
 }
 
 var Followers = function(game, amnt, texture){
