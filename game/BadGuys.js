@@ -15,6 +15,9 @@ var BadGuy = function(game, texture, index){
   this.onWater = false;
   this.seekTimer = 0;
   this.health = 1;
+  this.firstAttack = true;
+  this.currentTarget;
+
 
 
   // setup constant variables
@@ -138,6 +141,7 @@ var BadGuy = function(game, texture, index){
   
   // move towards last known player position
   this.seek = function(speed){
+      this.firstAttack = true;
       var speedChng = this.onWater? speed/2: speed
       game.physics.arcade.moveToXY(this, this.heading.x, this.heading.y, speedChng);
       
@@ -147,6 +151,10 @@ var BadGuy = function(game, texture, index){
   }
   // attack the player
   this.stopAndAttack = function(){
+    if(this.firstAttack){
+      this.attackStart = game.time.time;
+      this.firstAttack = false;
+    }
     this.body.velocity.x = 0;
     this.body.velocity.y = 0;
     if(findDistance(this.player.position, this.position, this.rotation) > 100)

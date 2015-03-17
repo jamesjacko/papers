@@ -14,6 +14,9 @@ var Round = function(game, texture, shooter, victim){
 	game.physics.enable(this);
 	this.killVictim = function(round, victim){
 		console.log("hit");
+		if(typeof victim.attackStart != "undefined"){
+			console.log(game.time.time - victim.attackStart, victim.currentTarget);
+		}
 		if(_this.shooter instanceof Hero){
 			game.killCount++;
 		}
