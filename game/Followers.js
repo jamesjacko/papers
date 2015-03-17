@@ -4,13 +4,14 @@
  * @param textrue the texture to use to draw the sprite
  * @param player the player sprite to be used for game logic
 */
-var Follower = function(game, texture ,position){
+var Follower = function(game, texture, position, followerType){
   var rand = new RandPoint();
 
   rand.x += 100;
   rand.y += 100;
 
   Phaser.Sprite.call(this, game, rand.x, rand.y, texture);
+  this.followerType = followerType;
   this.player = game.player;
   this.moniker = "Timmy"
   this.index = position;
@@ -57,7 +58,7 @@ var Follower = function(game, texture ,position){
   game.physics.enable(this);
 
   this.helpme = function(_this){
-    game.broadcast(_this.helpalerts[Math.floor(Math.random() * 5)]);
+    game.broadcast(_this.helpalerts[Math.floor(Math.random() * (Object.keys(_this.helpalerts).length - 1))]);
     _this.underAttack = false;
     _this.helpmecounter = _this.helpwait;
   }

@@ -17,7 +17,9 @@ window.onload = function() {
     game.load.image('round', 'images/round.png');
     game.load.image('mine', 'images/mine.png');
     game.load.image('healthbar', 'images/healthbar.png');
-    game.load.image('follower', 'images/follower.png');
+    game.load.image('follower0', 'images/follower_m.png');
+    game.load.image('follower1', 'images/follower_f.png');
+    game.load.image('follower2', 'images/follower_r.png');
     game.load.image('arrow', 'images/arrow.png');
     game.time.advancedTiming = true;
 
@@ -35,11 +37,12 @@ window.onload = function() {
   var BAD_GUY_AMNT = 20;
   var map;
   var layer;
+  var starttime;
 
   var cursors;
 
   function create() {
-
+    starttime = game.time.time;
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
     map = game.add.tilemap('desert');
@@ -50,12 +53,14 @@ window.onload = function() {
 
     layer.resizeWorld();
     // initialize player and npc groups
-    game.player = new Hero(game, 'goodGuy', true);
+    game.player = new Hero(game, 'goodGuy', false);
     game.player = game.add.existing(game.player);
     
-    game.follower = new Follower(game, 'follower', i);
+    var followerType = Math.floor((Math.random() * 3));
+
+    game.follower = new Follower(game, 'follower' + followerType, i);
     game.follower = game.add.existing(game.follower);
-    game.badGuyGroup = new BadGuys(game, BAD_GUY_AMNT, 'badGuy');
+    game.badGuyGroup = new BadGuys(game, BAD_GUY_AMNT, 'badGuy', followerType);
 
     // water and land collision detections
     map.setTileIndexCallback(1, collide, this, layer);
@@ -72,20 +77,26 @@ window.onload = function() {
 
   function update() {
     // send user to survey on death
-    if((game.player.health < 1 && !game.player.god) || game.follower.health < 1){
-      if(game.follower.health < 1)
-        alert("You failed to save " + game.follower.moniker);
-      else 
-        alert("You died");
-      game.destroy();
-      window.open("https://www.surveymonkey.com/s/MYSC88K");
+    if((game.player.health < 1 && !game.player.god)){
+      alert("You died");
+      console.log(game.time.time - starttime)
+      var data = {
+        time: game.time.time - starttime,
+        score: game.killCount,
+        companionSurvived: game.follower.health > 0,
+        
+      }
+      game.paused = true;
     } else {
-    
-    game.physics.arcade.collide(game.follower, game.follower);
-    game.physics.arcade.collide(game.badGuyGroup, game.badGuyGroup);
-    // enable tilemap collision
-    this.game.physics.arcade.collide(game.player, layer, collide);
+      game.physics.arcade.collide(game.follower, game.follower);
+      game.physics.arcade.collide(game.badGuyGroup, game.badGuyGroup);
+      // enable tilemap collision
+      this.game.physics.arcade.collide(game.player, layer, collide);
     }
+
+    if(game.killCount % 10 == 0 && game.killCount > 0)
+      game.badGuyGroup.addBadGuys(10 + killCount / 10);
+  
 
   }
 
@@ -93,7 +104,8 @@ window.onload = function() {
     // screen text
     game.debug.text(game.follower.moniker + ' Lives: ' + game.follower.health, 32, 96, 'rgb(0,255,0)');
     game.debug.text('Lives: ' + game.player.health, 32, 64, 'rgb(0,255,0)');
-    game.debug.text('Kill Count: ' + game.killCount, 32, 32, 'rgb(0,255,0)');
+    var follDead = (game.follower.health < 1)? " (-25)": "";
+    game.debug.text('Points: ' + game.killCount + follDead, 32, 32, 'rgb(0,255,0)');
 
   }
 

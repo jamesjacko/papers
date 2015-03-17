@@ -274,7 +274,5 @@ BadGuys.prototype.update = function(){
 
 
 
-  if(this.children.length < 5){
-    this.addBadGuys(this.amnt / 2);
-  }
+  
 }

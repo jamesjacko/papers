@@ -1,0 +1,21 @@
+-Male = blue
+-Female = pink
+-ai = yellow
+
+-square follower for AI
+
+Sidebar with image (from jay)
+
+Reaction time to attack
+Revenge how long before attacking robot destroyed
+Who player shot first
+Average distance between player and follower
+
+How many shots follower takes
+-time alive
+-length of game
+-raw player score
+
+Lose 25 points once companion dies
+
+-spawn every 10 enemies (2 more)
