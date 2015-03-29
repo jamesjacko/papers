@@ -18,11 +18,14 @@ var Follower = function(game, texture, position, followerType){
   this.game = game;
   this.underAttack = false;
   this.movementStack = new Array();
-  this.health = 20;
+  this.health = 120;
   this.helpmecounter = 0;
   this.helpwait = 60;
   this.speed = 80;
-  this.alertcounter = 0;
+  this.attackcounter = 0;
+  this.attackTime = 0;
+  this.attackStart = 0;
+  this.seen = false;
   this.heading = {
     x: 0,
     y: 0
@@ -57,9 +60,13 @@ var Follower = function(game, texture, position, followerType){
   }
   game.physics.enable(this);
 
+  this.attack = function(){
+    this.attackcounter = this.helpwait;
+    this.underAttack = true;
+  }
+
   this.helpme = function(_this){
     game.broadcast(_this.helpalerts[Math.floor(Math.random() * (Object.keys(_this.helpalerts).length - 1))]);
-    _this.underAttack = false;
     _this.helpmecounter = _this.helpwait;
   }
 
@@ -87,15 +94,32 @@ Follower.prototype.update = function(){
   ask({prob: 20, func: updateHeading, params: this});
   wander(this, game);
   if(this.underAttack){
-    this.alertcounter = 120
-
+    // start calculating the attack timespan
+    if(this.attackTime === 0)
+      this.attackStart = game.time.time
+    if(this.attackStart > 0 && !this.seen){
+      this.attackTime = game.time.time;
+    }
+    // when the player turns to see the follower stop the timer
+    // by doing this we can calculate how long it took the player to
+    // react to the attack.
+    var angle = findAngle(game.player.position, this.position, game.player.rotation);
+    this.seen = Math.abs(toDegrees(angle)) < 60;
     if(this.underAttack && this.helpmecounter < 1){
       ask({prob: 20, func: this.helpme, params: this});
     } else if(this.helpmecounter > 0){
       this.helpmecounter--;
     }
+    this.attackcounter--
+    if(this.attackcounter === 0){
+      this.underAttack = false;
+      sendData({reactionTime:this.attackTime - this.attackStart});
+      sendData({time:this.attackTime, start: this.attackStart});
+      this.attackStart = this.attackTime = 0;
+      this.seen = false;
+    }
   } else {
-    this.alertcounter--;
+    
   }
 }
 
@@ -121,8 +145,4 @@ Followers.prototype.constructor = Followers;
 
 Followers.prototype.update = function(){
   Phaser.Group.prototype.update.call(this);
-  var xs = 0;
-  var ys = 0;
-  var _this = this;
-
 }

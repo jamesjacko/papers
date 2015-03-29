@@ -2,8 +2,10 @@ window.onload = function() {
   var width = 100;
   var height = 100;
   var counter = 0;
+
   game = new Phaser.Game(800, 500, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
 
+  game.killedGuys = [];
   /**
     preload the game, mainly for preloading images and the tilemap
   */
@@ -34,7 +36,7 @@ window.onload = function() {
 
   var FOLLOWER_AMNT = 1;
 
-  var BAD_GUY_AMNT = 20;
+  var BAD_GUY_AMNT = 30;
   var map;
   var layer;
   var starttime;
@@ -62,6 +64,17 @@ window.onload = function() {
     game.follower = game.add.existing(game.follower);
     game.badGuyGroup = new BadGuys(game, BAD_GUY_AMNT, 'badGuy', followerType);
 
+    game.bullets = game.add.group();
+    console.log(game.cache.getImage('round'));
+    for(var i = 0; i < 20; i++){
+      var bull = new Round('round', null, null);
+      game.add.existing(bull);
+      bull.kill();
+      game.bullets.add(bull);
+    }
+
+
+
     // water and land collision detections
     map.setTileIndexCallback(1, collide, this, layer);
     map.setTileIndexCallback(2, collide, this, layer);
@@ -79,7 +92,6 @@ window.onload = function() {
     // send user to survey on death
     if((game.player.health < 1 && !game.player.god)){
       alert("You died");
-      console.log(game.time.time - starttime)
       var data = {
         time: game.time.time - starttime,
         score: game.killCount,
@@ -94,8 +106,11 @@ window.onload = function() {
       this.game.physics.arcade.collide(game.player, layer, collide);
     }
 
-    if(game.killCount % 10 == 0 && game.killCount > 0)
-      game.badGuyGroup.addBadGuys(10 + killCount / 10);
+    if((game.killCount + 1) % 10 == 0 && game.killCount > 0)
+      game.badGuyGroup.moreBadGuys(10, game.killCount);
+
+    if(game.follower.health === 0)
+      game.follower.kill();
   
 
   }

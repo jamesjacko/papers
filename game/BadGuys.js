@@ -4,10 +4,9 @@
  * @param textrue the texture to use to draw the sprite
  * @param player the player sprite to be used for game logic
 */
-var BadGuy = function(game, texture, index){
+var BadGuy = function(texture, index){
   this.player = game.player;
   this.index = index;
-  this.game = game;
   this.movementStack = new Array();
   this.state = "dosile";  
   this.visionCone = game.add.bitmapData(game.world.width, game.world.height);
@@ -17,6 +16,8 @@ var BadGuy = function(game, texture, index){
   this.health = 1;
   this.firstAttack = true;
   this.currentTarget;
+  this.isBadGuy == true;
+  this.speed = 60;
 
 
 
@@ -82,11 +83,11 @@ var BadGuy = function(game, texture, index){
 
   this.targetOther = function(obj){
     var angle = findAngle(this.position, obj.position, this.rotation);
-    if(Math.abs(toDegrees(angle)) < this.VISION_ANGLE && 
-      this.game.physics.arcade.distanceBetween(this, obj) < this.VISION_LENGTH * this.visionMagnifier){
+    if((Math.abs(toDegrees(angle)) < this.VISION_ANGLE && 
+          game.physics.arcade.distanceBetween(this, obj) < this.VISION_LENGTH * this.visionMagnifier)&& obj.alive){
       this.state = "alert";
       this.currentTarget = obj;
-      this.seekTimer = this.game.time.now + this.SEEK_TIME;
+      this.seekTimer = game.time.now + this.SEEK_TIME;
       this.heading.x = obj.position.x;
       this.heading.y = obj.position.y;
     }
@@ -107,13 +108,14 @@ var BadGuy = function(game, texture, index){
 
     this.visionMagnifier = (this.state == "alert" || this.state == "seek")? 2 : 1;
 
-    if(this.game.time.now > this.seekTimer) {
+    if(game.time.now > this.seekTimer) {
       this.state = "dosile";
+      this.currentTarget = null;
     } else {
       this.state = "seek";
     }
-    this.targetOther(this.game.player);
-    this.targetOther(this.game.follower);
+    this.targetOther(game.player);
+    this.targetOther(game.follower);
   }
   // draws the vision cone.
   this.drawCone = function(){
@@ -160,11 +162,15 @@ var BadGuy = function(game, texture, index){
     if(findDistance(this.player.position, this.position, this.rotation) > 100)
       this.seek(50);
 
-    if(this.game.time.now > this.nextRound){
-      var bullet = new Round(this.game, 'round', this, this.currentTarget);
-      game.add.existing(bullet);
-      bullet.fire();
-      this.nextRound = this.game.time.now + this.FIRE_RATE;
+    if(game.time.now > this.nextRound){
+      var bullet = game.bullets.getFirstDead();
+
+      if(bullet){
+        bullet.reset(this.position.x, this.position.y);
+        bullet.fire(this, this.currentTarget);
+        this.nextRound = game.time.now + this.FIRE_RATE;
+      }
+
     }
   }
   // avoid other NPCS
@@ -205,32 +211,34 @@ BadGuy.prototype.constructor = BadGuy;
  */
 BadGuy.prototype.update = function(){
 
+  if(this.alive){
+    if(this.health < 1){
+      this.kill();
+      return;
+    } else {
 
-  if(this.health < 1){
-    this.destroy();
-  } else {
-
-    this.avoidOthers();
-  
-    this.setState();
+      this.avoidOthers();
     
+      this.setState();
+      
 
-    Phaser.Sprite.prototype.update.call(this);
-    // state machine
-    switch(this.state){
-      case "alert":
-        this.stopAndAttack();
-        break;
-      case "dosile":
-        ask({prob: 20, func: updateHeading, params: this});
-        wander(this, game);
-        break;
-      case "seek":
-        this.seek(this.SEEK_SPEED);
-    }
+      Phaser.Sprite.prototype.update.call(this);
+      // state machine
+      switch(this.state){
+        case "alert":
+          this.stopAndAttack();
+          break;
+        case "dosile":
+          ask({prob: 20, func: updateHeading, params: this});
+          wander(this, game);
+          break;
+        case "seek":
+          this.seek(this.SEEK_SPEED);
+      }
 
-    if(this.isSelected){
-      this.drawCone();
+      if(this.isSelected){
+        this.drawCone();
+      }
     }
   }
 
@@ -256,16 +264,29 @@ var BadGuys = function(game, amnt, texture){
 
   this.addBadGuys = function(amnt){
     for(var i = 0; i < amnt; i++){
-      var aBadGuy = new BadGuy(game, texture, i);
+      var aBadGuy = new BadGuy(texture, i);
       
       var sprite = this.add(aBadGuy);
 
       sprite.inputEnabled = true;
       sprite.events.onInputDown.add(_this.listener,this);
+      aBadGuy.kill();
+    }
+  }
+
+  this.moreBadGuys = function(amnt, mult){
+    var bg;
+    for(var i = 0; i < amnt; i++){
+      bg = this.getFirstDead();
+      if(bg != null){
+        bg.reset(game.world.randomX, game.world.randomY);
+        bg.speed = bg.speed + mult;
+      }
     }
   }
   
   this.addBadGuys(this.amnt);
+  this.moreBadGuys(20, 1);
 
   
 
@@ -276,11 +297,4 @@ BadGuys.prototype.constructor = BadGuys;
 
 BadGuys.prototype.update = function(){
   Phaser.Group.prototype.update.call(this);
-  var xs = 0;
-  var ys = 0;
-  var _this = this;
-
-
-
-  
 }

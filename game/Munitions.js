@@ -1,29 +1,46 @@
-var Round = function(game, texture, shooter, victim){
-	this.game = game;
+var Round = function(texture, shooter, victim){
 	this.shooter = shooter;
 	this.victim = victim;
-	Phaser.Sprite.call(this, game, shooter.position.x, shooter.position.y, texture);
+	this.count = 0;
+	Phaser.Sprite.call(this, game, 0, 0, texture);
 	this.nextRound;
-	_this = this;
 	this.outOfBoundsKill = true;
-	this.fire = function(offset){
-		var off = offset || 0;
-		_this.rotation = _this.shooter.rotation;
-		_this.game.physics.arcade.velocityFromAngle(toDegrees(_this.shooter.rotation) + off, 400, _this.body.velocity);	
+    this.checkWorldBounds = true;
+	_this = this;
+
+	this.setShooter = function(obj){
+		this.shooter = obj;
+	}
+	this.setVictim = function(obj){
+		this.victim = obj;
+	}
+
+
+	this.fire = function(s, v){
+		this.setShooter(s);
+		this.setVictim(v);
+		this.rotation = s.rotation;
+		game.physics.arcade.velocityFromAngle(toDegrees(s.rotation), 400, this.body.velocity);
+
 	}
 	game.physics.enable(this);
 	this.killVictim = function(round, victim){
-		console.log("hit");
-		if(typeof victim.attackStart != "undefined"){
-			console.log(game.time.time - victim.attackStart, victim.currentTarget);
+		if(victim.isBadGuy){
+			var kill = {
+				followerUnderAttack: game.follower.underAttack,
+				killTarget: victim.currentTarget
+			}
+			game.killedGuys.push(kill);
 		}
-		if(_this.shooter instanceof Hero){
+		if(typeof victim.attackStart != "undefined"){
+		}
+		if(round.shooter instanceof Hero){
 			game.killCount++;
 		}
-		round.destroy();
+		round.kill();
 		victim.health--;
-		if(typeof victim.underAttack != "undefined"){
-			victim.underAttack = true;
+		if(typeof victim.attack != "undefined"){
+			victim.attack();
 		}
 	}
 	this.anchor = {
@@ -42,7 +59,9 @@ Round.prototype.constructor = BadGuy;
 
 Round.prototype.update = function(){
 	Phaser.Sprite.prototype.update.call(this);
-	game.physics.arcade.collide(this, this.victim, this.killVictim);
+	if(this.alive){
+		game.physics.arcade.collide(this, this.victim, this.killVictim);
+	}
 }
 
 var Mine = function(game, texture, shooter, victim){

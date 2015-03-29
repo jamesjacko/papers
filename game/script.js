@@ -71,3 +71,6 @@ function toDegrees(radians){
   return radians * (180 / Math.PI);
 }
 
+function sendData(obj){
+  console.log(obj);
+}

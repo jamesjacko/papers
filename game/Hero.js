@@ -31,9 +31,13 @@ var Hero = function(game, texture, god){
   game.camera.follow(this);
 
   this.fire = function(){
-    bullet = new Round(game, 'round', this, game.badGuyGroup);
-    game.add.existing(bullet);
-    bullet.fire();
+    var bullet = game.bullets.getFirstDead();
+
+    if(bullet){
+      bullet.reset(this.position.x, this.position.y);
+      bullet.fire(game.player, game.badGuyGroup);
+      this.nextRound = game.time.now + game.player.FIRE_RATE;
+    }
   };
 
   this.placeMine = function(){
@@ -74,26 +78,26 @@ Hero.prototype.update = function(){
       this.healthBar.position.x = this.position.x - this.width / 2;
       this.healthBar.position.y = this.position.y - this.height / 2 - 10;
       // slow the player down when on water
-      var inc = (this.onWater)? 100: 200;
+      this.inc = (this.onWater)? 100: 200;
 
       if(this.cursors.left.isDown){
-        this.body.angularVelocity = -inc;
+        this.body.angularVelocity = -this.inc;
       } else if (this.cursors.right.isDown){
-        this.body.angularVelocity = inc;
+        this.body.angularVelocity = this.inc;
       }
       if(this.cursors.up.isDown){
-        this.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(this.angle, inc));
+        this.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(this.angle, this.inc));
       }
-      if( !game.follower.inCamera ){
+      if( !game.follower.inCamera && game.follower.alive ){
             this.followermarker.revive(0);
-            var dx = game.follower.position.x - this.position.x;
-            var dy = game.follower.position.y - this.position.y;
-            var angle = Math.atan2(dy, dx);
-            var pointer_x = this.position.x + Math.cos(angle) * 60;
-            var pointer_y = this.position.y + Math.sin(angle) * 60;
-            this.followermarker.rotation = angle;
-            this.followermarker.position.x = pointer_x;
-            this.followermarker.position.y = pointer_y;
+            this.dx = game.follower.position.x - this.position.x;
+            this.dy = game.follower.position.y - this.position.y;
+            this.pointangle = Math.atan2(this.dy, this.dx);
+            this.pointer_x = this.position.x + Math.cos(this.pointangle) * 60;
+            this.pointer_y = this.position.y + Math.sin(this.pointangle) * 60;
+            this.followermarker.rotation = this.pointangle;
+            this.followermarker.position.x = this.pointer_x;
+            this.followermarker.position.y = this.pointer_y;
 
           }else if (game.follower.alive) {
 
