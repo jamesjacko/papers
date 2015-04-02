@@ -13,7 +13,22 @@ var Hero = function(game, texture, god){
   Phaser.Sprite.call(this, game, 400, 400, texture);
 
   this.followermarker = new Phaser.Sprite(game, 400, 400, 'arrow');
+
+  this.followermarker.width = 17;
+
+  this.followermarker.height = 20;
+
+  this.followermarker.animations.add('go', [
+        'arrow1.png',
+        'arrow2.png',
+    ], 10, true, false);
+
+
+  this.followermarker.animations.play('go');
   this.followermarker = game.add.existing(this.followermarker);
+
+  
+
   this.followermarker.anchor.setTo(0.5, 0.5);
   this.followermarker.kill();
 
@@ -89,6 +104,12 @@ Hero.prototype.update = function(){
         this.body.velocity.copyFrom(game.physics.arcade.velocityFromAngle(this.angle, this.inc));
       }
       if( !game.follower.inCamera && game.follower.alive ){
+            if(game.follower.underAttack){
+              this.followermarker.animations.play('go');
+            }
+            else{
+              this.followermarker.animations.stop('go', true);
+            }
             this.followermarker.revive(0);
             this.dx = game.follower.position.x - this.position.x;
             this.dy = game.follower.position.y - this.position.y;

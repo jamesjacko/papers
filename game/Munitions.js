@@ -1,6 +1,7 @@
 var Round = function(texture, shooter, victim){
 	this.shooter = shooter;
 	this.victim = victim;
+	this.secondary = null;
 	this.count = 0;
 	Phaser.Sprite.call(this, game, 0, 0, texture);
 	this.nextRound;
@@ -14,26 +15,46 @@ var Round = function(texture, shooter, victim){
 	this.setVictim = function(obj){
 		this.victim = obj;
 	}
+	this.setSecondary = function(obj){
+		this.secondary = obj;
+	}
+
+	this.resetRound = function(posX, posY){
+		this.reset(posX, posY);
+		this.secondary = null;
+		this.count = 0;
+	}
 
 
-	this.fire = function(s, v){
+	this.fire = function(s, v, sec){
 		this.setShooter(s);
 		this.setVictim(v);
 		this.rotation = s.rotation;
 		game.physics.arcade.velocityFromAngle(toDegrees(s.rotation), 400, this.body.velocity);
-
+		if(typeof sec != "undefined"){
+			this.setSecondary(sec);
+		}
+		if(v === game.player){
+			game.bulletCounts.player ++;
+		} else if(v === game.follower) {
+			game.bulletCounts.companion ++;
+		} else {
+			game.bulletCounts.enemies ++;
+		}
 	}
 	game.physics.enable(this);
-	this.killVictim = function(round, victim){
-		if(victim.isBadGuy){
+	this.killVictim = function(round, victim, s){
+		if(victim instanceof BadGuy){
+			var target = "none";
+			if(victim.currentTarget != null)
+				target = (victim.currentTarget == game.player)? "player": "companion";
 			var kill = {
 				followerUnderAttack: game.follower.underAttack,
-				killTarget: victim.currentTarget
+				killTarget: target
 			}
 			game.killedGuys.push(kill);
 		}
-		if(typeof victim.attackStart != "undefined"){
-		}
+		
 		if(round.shooter instanceof Hero){
 			game.killCount++;
 		}
@@ -61,6 +82,9 @@ Round.prototype.update = function(){
 	Phaser.Sprite.prototype.update.call(this);
 	if(this.alive){
 		game.physics.arcade.collide(this, this.victim, this.killVictim);
+		
+		game.physics.arcade.collide(this, this.secondary, this.killVictim);
+		
 	}
 }
 

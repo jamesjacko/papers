@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <title>Game</title>
+    <script src="https://cdn.firebase.com/js/client/2.2.3/firebase.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
     <script src="phaser.js"></script>
     <script src="script.js"></script>
     <script src="create-file.js"></script>
@@ -12,11 +14,19 @@
     <script src="BadGuys.js"></script>
     <script src="Munitions.js"></script>
     <script src="Game.js"></script>
+
     <link rel="stylesheet" type="text/css" href="style.css">
   </head>
   <body>
 
-    <div id="game"></div>
+    <div id="welcome">
+        <div id="welcomeMessage" onclick="go();"><strong>War Web</strong><br /><span id="compName"></span> has been sent to a remote server on the digital WarWeb to investigate how the Killer Code bots have been taking over cyberspace; you have been sent to protect <span id="compPN"></span> during their mission.... It was going to be easy, a babysitting exercise, until the KC bots arrived... Now you just need to survive.<br/>If <span id="compName2"></span> dies, you loose 25 points<br /><u>Click to play</u></div>
+    </div>
+    <div id="game" width="800" height="500"></div>
     <div id="padd"><div id ="game-messages"><p></p></div></div>
+
+    <div id="grats">
+        <div id="gratsMessage" onclick="location.reload();">Game Over<br />Youe score: <span id="gratsScore">35</span><br/>Click to play again.</div>
+    </div>
   </body>
 </html>

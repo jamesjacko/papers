@@ -72,5 +72,5 @@ function toDegrees(radians){
 }
 
 function sendData(obj){
-  console.log(obj);
+  game.reactionTimes.push(obj);
 }

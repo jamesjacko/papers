@@ -15,7 +15,7 @@ var BadGuy = function(texture, index){
   this.seekTimer = 0;
   this.health = 1;
   this.firstAttack = true;
-  this.currentTarget;
+  this.currentTarget = null;
   this.isBadGuy == true;
   this.speed = 60;
 
@@ -166,8 +166,10 @@ var BadGuy = function(texture, index){
       var bullet = game.bullets.getFirstDead();
 
       if(bullet){
-        bullet.reset(this.position.x, this.position.y);
-        bullet.fire(this, this.currentTarget);
+        bullet.resetRound(this.position.x, this.position.y);
+        var secondary = (this.currentTarget == game.player)? game.follower: game.player;
+        
+        bullet.fire(this, this.currentTarget, secondary);
         this.nextRound = game.time.now + this.FIRE_RATE;
       }
 

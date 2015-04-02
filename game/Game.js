@@ -1,28 +1,63 @@
-window.onload = function() {
+$(window).bind("load", function() {
+  followerType = Math.floor((Math.random() * 3));
+
+  followerObj = {
+    moniker: "AH-BOT 897",
+    pronoun: "it"
+  }
+  if(followerType < 2){
+    followerObj.moniker = (followerType == 0) ? "Timmy" : "Daisy";
+    followerObj.pronoun = (followerType == 0) ? "him" : "her";
+  }
+
+  document.getElementById("compName").innerHTML = followerObj.moniker;
+  document.getElementById("compName2").innerHTML = followerObj.moniker;
+  document.getElementById("compPN").innerHTML = followerObj.pronoun;
+  runGame();
+
+});
+
+var go = function(){
+  game.paused = false;
+  document.getElementById("welcome").style.display = "none";
+}
+
+var runGame = function(){
+
+  
   var width = 100;
   var height = 100;
   var counter = 0;
 
+  
+  
+
   game = new Phaser.Game(800, 500, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render });
 
   game.killedGuys = [];
+  game.reactionTimes = [];
+  game.followerDistance = 0;
+  game.fCount = 0;
+  game.bulletCounts = {
+    player: 0,
+    companion: 0,
+    enemies: 0
+  }
   /**
     preload the game, mainly for preloading images and the tilemap
   */
   function preload() {
-    game.load.tilemap('desert', createJSON(width, height) , null, Phaser.Tilemap.TILED_JSON);
-    game.load.image('tiles', 'images/new_map.png');
-    game.load.image('car', 'images/car90.png');
+    //game.load.tilemap('desert', createJSON(width, height) , null, Phaser.Tilemap.TILED_JSON);
+    game.load.image("background", "images/bg.png");
     game.load.image('goodGuy', 'images/goodGuy.png');
     game.load.image('badGuy', 'images/badGuy.png');
-    game.load.image('ball', 'images/heading.png');
     game.load.image('round', 'images/round.png');
-    game.load.image('mine', 'images/mine.png');
     game.load.image('healthbar', 'images/healthbar.png');
     game.load.image('follower0', 'images/follower_m.png');
     game.load.image('follower1', 'images/follower_f.png');
     game.load.image('follower2', 'images/follower_r.png');
-    game.load.image('arrow', 'images/arrow.png');
+    game.load.image('arrowGreen', 'images/arrowGreen.png');
+    game.load.atlasJSONHash('arrow', 'images/arrowNew.png', 'images/arrow.json');
     game.time.advancedTiming = true;
 
   }
@@ -47,26 +82,30 @@ window.onload = function() {
     starttime = game.time.time;
     game.physics.startSystem(Phaser.Physics.ARCADE);
 
-    map = game.add.tilemap('desert');
+    //map = game.add.tilemap('desert');
 
-    map.addTilesetImage('Desert', 'tiles');
+    //map.addTilesetImage('Desert', 'tiles');
 
-    layer = map.createLayer('Ground');
+    //layer = map.createLayer('Ground');
 
-    layer.resizeWorld();
+    //layer.resizeWorld();
     // initialize player and npc groups
+    var background = game.add.tileSprite(0, 0, 2000, 2000, "background");
     game.player = new Hero(game, 'goodGuy', false);
     game.player = game.add.existing(game.player);
+    game.world.resize(2000,2000);
     
-    var followerType = Math.floor((Math.random() * 3));
+    
+    
 
-    game.follower = new Follower(game, 'follower' + followerType, i);
+    document.getElementById("padd").style.backgroundImage = "url('images/profile"+followerType+".jpg')";
+
+    game.follower = new Follower(game, 'follower' + followerType, followerType);
     game.follower = game.add.existing(game.follower);
     game.badGuyGroup = new BadGuys(game, BAD_GUY_AMNT, 'badGuy', followerType);
 
     game.bullets = game.add.group();
-    console.log(game.cache.getImage('round'));
-    for(var i = 0; i < 20; i++){
+    for(var i = 0; i < 400; i++){
       var bull = new Round('round', null, null);
       game.add.existing(bull);
       bull.kill();
@@ -75,12 +114,12 @@ window.onload = function() {
 
 
 
-    // water and land collision detections
-    map.setTileIndexCallback(1, collide, this, layer);
-    map.setTileIndexCallback(2, collide, this, layer);
+    // // water and land collision detections
+    // map.setTileIndexCallback(1, collide, this, layer);
+    // map.setTileIndexCallback(2, collide, this, layer);
 
     game.killCount = 0;
-
+    game.paused = true;
   }
 
   // set the object that has collided with water to be on water
@@ -89,15 +128,23 @@ window.onload = function() {
   }
 
   function update() {
+    game.fCount++;
     // send user to survey on death
     if((game.player.health < 1 && !game.player.god)){
-      alert("You died");
+      document.getElementById("grats").style.visibility = "visible";
+      document.getElementById("gratsScore").innerHTML = (game.follower.health < 1)?  game.killCount - 25 : game.killCount;
       var data = {
+        followerType: game.follower.followerType,
         time: game.time.time - starttime,
         score: game.killCount,
         companionSurvived: game.follower.health > 0,
-        
+        kills: game.killedGuys,
+        reactions: game.reactionTimes,
+        aveDistance: game.followerDistance / game.fCount,
+        bulletCounts: game.bulletCounts
       }
+      var firebaseRef = new Firebase("https://empathygame.firebaseio.com/");
+      firebaseRef.push(data);
       game.paused = true;
     } else {
       game.physics.arcade.collide(game.follower, game.follower);
@@ -112,7 +159,7 @@ window.onload = function() {
     if(game.follower.health === 0)
       game.follower.kill();
   
-
+    game.followerDistance += Math.abs(game.physics.arcade.distanceBetween(game.player, game.follower));
   }
 
   function render() {
@@ -125,3 +172,8 @@ window.onload = function() {
   }
 
 };
+
+window.onunload = function(){
+  game.destoy(true);
+  delete game;
+}
